@@ -1,6 +1,6 @@
-export default (database, DataTypes) => {
-  const DiningHall = database.define(
-    "Dining_Hall",
+export default (sequelize, DataTypes) => {
+  const DiningHall = sequelize.define(
+    'DiningHall',
     {
       hall_id: {
         type: DataTypes.INTEGER,
