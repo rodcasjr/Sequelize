@@ -1,7 +1,7 @@
 async function getData() {
   console.log('data request');
   // const dining = document.querySelector('dining');
-  const request = await fetch('http://localhost:3000/api/DiningHall', {method: 'GET'});
+  const request = await fetch('http://localhost:3000/api/dining', {method: 'GET'});
   const tableData = await request.json();
   return tableData;
 }
