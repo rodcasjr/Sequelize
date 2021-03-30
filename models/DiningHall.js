@@ -1,5 +1,5 @@
-export default (sequelize, DataTypes) => {
-  const DiningHall = sequelize.define(
+export default (database, DataTypes) => {
+  const DiningHall = database.define(
     'Dining_Hall',
     {
       hall_id: {
