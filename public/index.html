@@ -7,26 +7,28 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css"
     />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.js"
+      integrity="sha512-P0pdbdTHc6MzepVlBNGN/c+lBFfFk0ISSc/GLLnQzR5QzfgVdQMvOhVK4RvnhylawHSn2QxgAjb3f+zxSMfyNg=="
+      crossorigin="anonymous"
+    ></script>
     <link rel="stylesheet" href="style.css" />
-    <title>Rodolfo Castro Lab 6</title>
+    <title>Meals Chart</title>
   </head>
   <body>
     <div class="container is-fluid">
       <div class="content notification is-primary is-small is-centered">
-        <h1>Rodolfo Castro Lab 6</h1>
+        <h1 class="has-text-centered">Meals Chart</h1>
       </div>
       <div>
-          <table class="table is-bordered is-striped">
-              <thead>
-                  <tr>
-                      <th>Hall Id</th>
-                      <th>Hall Name</th> 
-                      <th>Hall Address</th>
-                  </tr>
-              </thead>
-              <tbody id="result">
-              </tbody>
-          </table>
+        <div id='mealChart'></div>
+      </div>
+      <div id="chart" style="height: 300px; width: 100%;"></div>
+      <div>
+        <table class="table is-bordered is-striped" id = "meals">
+          <thead id="resultHead"></thead>
+          <tbody id="result"></tbody>
+        </table>
       </div>
     </div>
   </body>
