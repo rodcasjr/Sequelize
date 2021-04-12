@@ -6,6 +6,10 @@ import db from '../database/initializeDB.js';
 
 const router = express.Router();
 
+router.get('/', (req, res) => {
+  res.send('Welcome to the UMD Dining API!');
+});
+
 /// /////////////////////////////////
 /// ////Dining Hall Endpoints////////
 /// /////////////////////////////////
@@ -27,6 +31,7 @@ router.get('/dining/:hall_id', async (req, res) => {
         hall_id: req.params.hall_id
       }
     });
+
     res.json(hall);
   } catch (err) {
     console.error(err);
@@ -35,11 +40,15 @@ router.get('/dining/:hall_id', async (req, res) => {
 });
 
 router.post('/dining', async (req, res) => {
+  const halls = await db.DiningHall.findAll();
+  const currentId = (await halls.length) + 1;
   try {
     const newDining = await db.DiningHall.create({
-      hall_id: req.body.hall_id,
+      hall_id: currentId,
       hall_name: req.body.hall_name,
-      hall_location: req.body.hall_location
+      hall_address: req.body.hall_address,
+      hall_lat: req.body.hall_lat,
+      hall_long: req.body.hall_long
     });
     res.json(newDining);
   } catch (err) {
@@ -85,6 +94,28 @@ router.put('/dining', async (req, res) => {
 /// /////////////////////////////////
 /// ////////Meals Endpoints//////////
 /// /////////////////////////////////
+
+router.route('/wholeMeal')
+  .get(async (req, res) => {
+    try {
+      const meals = await db.Meals.findAll();
+      const macros = await db.Macros.findAll();
+      const wholeMeals = meals.map((meal) => {
+        const macroEntry = macros.find((macro) => macro.meal_id === meal.meal_id);
+        console.log('meal', meal)
+        console.log('macroEntry', macroEntry);
+        return {
+          ...meal.dataValues,
+          ...macroEntry.dataValues
+        };
+      });
+      res.json({data: wholeMeals});
+    } catch (err) {
+      console.error(err);
+      res.json({message: 'something went wrong on the server!'});
+    }
+  });
+
 router.get('/meals', async (req, res) => {
   try {
     const meals = await db.Meals.findAll();
@@ -207,20 +238,53 @@ router.get('/restrictions/:restriction_id', async (req, res) => {
     res.json(restrictions);
   } catch (err) {
     console.error(err);
-    gi;
     res.error('Server error');
   }
 });
 
+/// //////////////////////////////////
+/// ///////Custom SQL Endpoint////////
 /// /////////////////////////////////
-/// //////Custom SQL Endpoint////////
-/// /////////////////////////////////
+const macrosCustom = 'SELECT `Dining_Hall_Tracker`.`Meals`.`meal_id` AS `meal_id`,`Dining_Hall_Tracker`.`Meals`.`meal_name` AS `meal_name`,`Dining_Hall_Tracker`.`Macros`.`calories` AS `calories`,`Dining_Hall_Tracker`.`Macros`.`carbs` AS `carbs`,`Dining_Hall_Tracker`.`Macros`.`sodium` AS `sodium`,`Dining_Hall_Tracker`.`Macros`.`protein` AS `protein`,`Dining_Hall_Tracker`.`Macros`.`fat` AS `fat`,`Dining_Hall_Tracker`.`Macros`.`cholesterol` AS `cholesterol`FROM(`Dining_Hall_Tracker`.`Meals`JOIN `Dining_Hall_Tracker`.`Macros`)WHERE(`Dining_Hall_Tracker`.`Meals`.`meal_id` = `Dining_Hall_Tracker`.`Macros`.`meal_id`)';
+router.get('/table/data', async (req, res) => {
+  try {
+    const result = await db.sequelizeDB.query(macrosCustom, {
+      type: sequelize.QueryTypes.SELECT
+    });
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.error('Server error');
+  }
+});
+
+const mealMapCustom = `SELECT hall_name,
+  hall_address,
+  hall_lat,
+  hall_long,
+  meal_name
+FROM
+  Meals m
+INNER JOIN Meals_Locations ml 
+  ON m.meal_id = ml.meal_id
+INNER JOIN Dining_Hall d
+ON d.hall_id = ml.hall_id;`;
+router.get('/map/data', async (req, res) => {
+  try {
+    const result = await db.sequelizeDB.query(mealMapCustom, {
+      type: sequelize.QueryTypes.SELECT
+    });
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.error('Server error');
+  }
+});
 router.get('/custom', async (req, res) => {
   try {
     const result = await db.sequelizeDB.query(req.body.query, {
       type: sequelize.QueryTypes.SELECT
     });
-    console.log('Result: ', result);
     res.json(result);
   } catch (err) {
     console.error(err);
